@@ -5,7 +5,7 @@
 // 1) Paste YOUR values from Supabase: Project Settings -> API
 //    These two are PUBLIC by design. Row Level Security protects the data.
 //    NEVER paste the "service_role" / secret key here.
-const SUPABASE_URL = 'https://qcaocouojhqevjnrwbkc.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://qcaocouojhqevjnrwbkc.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_6kxJsygn1nq96PwPlUzosA_NedToM-r';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
