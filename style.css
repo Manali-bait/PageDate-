@@ -31,3 +31,12 @@ footer{text-align:center;color:var(--mu);padding:24px;font-size:.85rem}
 @media(max-width:700px){.qwrap{grid-template-columns:1fr}}
 
 dialog{background:var(--card);color:var(--ink);border:1px solid var(--ln);border-radius:14px;padding:20px;max-width:420px;width:92%}dialog::backdrop{background:rgba(0,0,0,.5)}dialog input{width:100%;margin-bottom:8px}header>span{display:flex;gap:8px;align-items:center}
+.authtabs{display:flex;gap:4px;margin:12px 0;border-bottom:1px solid var(--ln)}
+.authtab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--mu);padding:8px;font:inherit;cursor:pointer}
+.authtab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ac);font-weight:bold}
+.pwrow{position:relative}.pwrow input{padding-right:64px}
+.linkbtn{background:none;border:0;color:var(--ac);text-decoration:underline;font:inherit;cursor:pointer;padding:4px}
+.pwrow .linkbtn{position:absolute;right:6px;top:4px}
+dialog .row{justify-content:space-between;margin-top:10px}
+#aMsg{min-height:1.4em;font-size:.9rem;margin:4px 0 8px}#aMsg.err{color:#d6455d}#aMsg.ok{color:var(--ac)}
+#authForm .btn{width:100%}[hidden]{display:none!important}

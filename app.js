@@ -20,7 +20,7 @@ function chips(box,items,key){items.forEach(n=>box.append(el('button',{className
 const sel={mood:'',trope:''};chips($('#moods'),Object.keys(MOODS),'mood');chips($('#tropes'),TROPES,'trope');
 function card(b){const c=el('article',{className:'card'},b.cover?el('img',{src:b.cover,alt:'Cover of '+b.title,loading:'lazy'}):el('div',{className:'nc',textContent:'No cover'}),el('h4',{textContent:b.title}),el('small',{textContent:b.author}));
  c.append(el('button',{className:'btn',textContent:'Add to shelf',onclick:e=>{if(shelf.some(x=>x.id===b.id)){e.target.textContent='Already on shelf';return}
-  shelf.unshift({...b,status:'want',page:0,rating:'',added:Date.now()});save('pd-shelf',shelf);e.target.textContent='Added!'}}));return c}
+  shelf.unshift({...b,status:'want',page:0,rating:'',added:Date.now()});saveItem(shelf[0]);e.target.textContent='Added!'}}));return c}
 let page=1,lastQ='';
 async function run(more){const base=$('#q').value.trim(),parts=[base,sel.mood&&MOODS[sel.mood],sel.trope&&sel.trope.replace('Grumpy Sunshine','grumpy sunshine')].filter(Boolean);
  if(!parts.length){$('#msg').textContent='Type something or pick a mood or trope.';return}
@@ -35,12 +35,12 @@ const opts=(s,o,v)=>{s.innerHTML='';Object.entries(o).forEach(([k,l])=>s.append(
 opts($('#fs'),{all:'All books',...ST},'all');$('#fs').onchange=drawShelf;
 function drawShelf(){const L=$('#shelfList');L.innerHTML='';const f=$('#fs').value,rows=shelf.filter(b=>f==='all'||b.status===f);
  if(!rows.length)L.append(el('p',{textContent:'Nothing here yet. Add books from Discover.'}));
- rows.forEach(b=>{const st=el('select',{onchange:e=>{b.status=e.target.value;if(b.status==='read'){b.finished=Date.now();if(b.pages)b.page=b.pages}save('pd-shelf',shelf);drawShelf()}});opts(st,ST,b.status);
-  const rt=el('select',{onchange:e=>{b.rating=e.target.value;save('pd-shelf',shelf)}});opts(rt,{'':'Rating',1:'1 star',2:'2 stars',3:'3 stars',4:'4 stars',5:'5 stars'},String(b.rating));
+ rows.forEach(b=>{const st=el('select',{onchange:e=>{b.status=e.target.value;if(b.status==='read'){b.finished=Date.now();if(b.pages)b.page=b.pages}saveItem(b);drawShelf()}});opts(st,ST,b.status);
+  const rt=el('select',{onchange:e=>{b.rating=e.target.value;saveItem(b)}});opts(rt,{'':'Rating',1:'1 star',2:'2 stars',3:'3 stars',4:'4 stars',5:'5 stars'},String(b.rating));
   const pct=b.pages?Math.min(100,Math.round(b.page/b.pages*100)):0;
-  const pg=b.pages?el('label',{textContent:'Page '},el('input',{type:'number',min:0,max:b.pages,value:b.page,style:'width:80px',onchange:e=>{b.page=+e.target.value;save('pd-shelf',shelf);drawShelf()}}),` / ${b.pages} (${pct}%)`):'';
+  const pg=b.pages?el('label',{textContent:'Page '},el('input',{type:'number',min:0,max:b.pages,value:b.page,style:'width:80px',onchange:e=>{b.page=+e.target.value;saveItem(b);drawShelf()}}),` / ${b.pages} (${pct}%)`):'';
   L.append(el('div',{className:'item'},b.cover?el('img',{src:b.cover,alt:''}):'',el('div',{},el('b',{textContent:b.title}),el('div',{textContent:b.author,style:'color:var(--mu)'}),el('div',{className:'row'},st,rt,pg,
-   el('button',{className:'btn',textContent:'Remove',onclick:()=>{if(confirm('Remove this book from your shelf?')){shelf=shelf.filter(x=>x!==b);save('pd-shelf',shelf);drawShelf()}}})))))})}
+   el('button',{className:'btn',textContent:'Remove',onclick:()=>{if(confirm('Remove this book from your shelf?')){shelf=shelf.filter(x=>x!==b);removeItem(b);drawShelf()}}})))))})}
 // blind date
 opts($('#bm'),{'':'Any mood',...Object.fromEntries(Object.keys(MOODS).map(m=>[m,m]))},'');opts($('#bt'),{'':'Any trope',...Object.fromEntries(TROPES.map(m=>[m,m]))},'');
 $('#wrap').onclick=async()=>{const m=$('#bm').value,t=$('#bt').value,q=[m&&MOODS[m],t].filter(Boolean).join(' ')||'fiction';$('#bd').innerHTML='Wrapping...';
@@ -80,4 +80,31 @@ function drawStats(){const y=new Date().getFullYear(),read=shelf.filter(b=>b.sta
  S.append(el('p',{},`Yearly goal: `,el('input',{type:'number',min:1,value:goal,style:'width:80px',onchange:e=>{goal=Math.max(1,+e.target.value);save('pd-goal',goal);drawStats()}}),` books. Progress: ${thisY.length}/${goal} (${Math.min(100,Math.round(thisY.length/goal*100))}%)`));
  S.append(el('h3',{textContent:'Books finished by month, '+y}),el('div',{className:'bar'},mo.map((n,i)=>el('div',{style:`height:${n/mx*100}%`,title:n+' books'},el('span',{textContent:'JFMAMJJASOND'[i]})))),el('br'),el('h3',{textContent:'Top subjects in books you read'}),
   el('p',{textContent:top.length?top.map(t=>t[0]+' ('+t[1]+')').join(', '):'Mark books as Read to see this.'}))}
-tab('discover');
+
+// shelf saved in Supabase when logged in
+// (logged out = still saved in this browser, like before)
+
+const toRow=b=>({book_key:b.id,title:b.title,author:b.author,cover:b.cover,pages:b.pages,year:b.year,subject:b.subject,
+  status:b.status,page:b.page||0,rating:b.rating?+b.rating:null,finished_at:b.finished?new Date(b.finished).toISOString():null});
+const fromRow=r=>({id:r.book_key,title:r.title,author:r.author||'Unknown author',cover:r.cover,pages:r.pages,year:r.year,subject:r.subject,
+  status:r.status,page:r.page,rating:r.rating??'',added:Date.parse(r.created_at),finished:r.finished_at?Date.parse(r.finished_at):undefined});
+async function saveItem(b){
+  if(!currentUser){save('pd-shelf',shelf);return}
+  const {error}=await sb.from('shelf').upsert(toRow(b),{onConflict:'user_id,book_key'});
+  if(error)alert('Could not save: '+error.message)}
+async function removeItem(b){
+  if(!currentUser){save('pd-shelf',shelf);return}
+  const {error}=await sb.from('shelf').delete().eq('book_key',b.id);
+  if(error)alert('Could not remove: '+error.message)}
+async function loadShelf(){
+  const note=$('#shelfNote');
+  if(!currentUser){shelf=load('pd-shelf',[]);note.textContent='Log in to save your shelf online and use it on any device.';drawShelf();return}
+  // move books saved in this browser into your account (once)
+  const local=load('pd-shelf',[]);
+  if(local.length){const {error}=await sb.from('shelf').upsert(local.map(toRow),{onConflict:'user_id,book_key',ignoreDuplicates:true});
+    if(!error)localStorage.removeItem('pd-shelf')}
+  const {data,error}=await sb.from('shelf').select('*').order('created_at',{ascending:false});
+  if(error){note.textContent='Could not load your shelf: '+error.message;return}
+  shelf=data.map(fromRow);note.textContent='Saved online to your account.';drawShelf()}
+window.addEventListener('pd-auth',loadShelf);
+tab('discover');loadShelf();
