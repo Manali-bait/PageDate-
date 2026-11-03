@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PageDate | Find your mood. Meet your book.</title><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head>
+<body><header><img class="logo" src="logo.png" alt="PageDate">
+<nav id="tabs"><button data-t="discover">Discover</button><button data-t="shelf">My Shelf</button><button data-t="blind">Blind Date</button><button data-t="journal">Journal</button><button data-t="quote">Quote Studio</button><button data-t="stats">Stats</button></nav>
+<select id="theme" aria-label="Theme"><option value="midnight">Midnight Scholar</option><option value="lavender">Lavender Library</option><option value="forest">Forest Reader</option><option value="ocean">Ocean Blue</option><option value="mocha">Mocha Cream</option><option value="plum">Charcoal Plum</option></select></header>
+<main>
+<section id="discover"><h1>Find a story that feels like you.</h1><p class="sub">Discover stories through moods, tropes and unexpected matches.</p>
+<form id="sf"><input id="q" placeholder="Search title, author, ISBN or subject" aria-label="Search"><button class="btn">Search</button></form>
+<h3>Mood</h3><div class="chips" id="moods"></div><h3>Trope</h3><div class="chips" id="tropes"></div>
+<p id="msg" role="status"></p><div class="grid" id="res"></div><button class="btn" id="more" hidden>Load more</button>
+<p class="note">Tropes and moods are matched through Open Library text search, so results are approximate.</p></section>
+<section id="shelf" hidden><h2>My Shelf</h2><select id="fs"></select><div class="list" id="shelfList"></div></section>
+<section id="blind" hidden><h2>Blind Date with a Book</h2><p class="sub">Pick a mood and a trope. We wrap a real book and hide it until you say so.</p>
+<div class="row"><select id="bm"></select><select id="bt"></select><button class="btn" id="wrap">Wrap me a book</button></div><div id="bd"></div></section>
+<section id="journal" hidden><h2>Reading Journal</h2><div class="form"><select id="jb"></select><input type="date" id="jd"><select id="jr"><option value="">Rating</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+<textarea id="jt" rows="4" placeholder="Your thoughts, favourite moments..."></textarea><button class="btn" id="js">Save entry</button></div>
+<input id="jq" placeholder="Search entries" aria-label="Search entries"><div class="list" id="jl"></div></section>
+<section id="quote" hidden><h2>Quote Studio</h2><p class="sub">Type your own quote or a short excerpt.</p><div class="qwrap"><div class="form">
+<textarea id="qt" rows="4">Every book begins with a feeling.</textarea><input id="qb" placeholder="Book title"><input id="qa" placeholder="Author">
+<select id="qs"></select><select id="qf"><option>Georgia</option><option>Palatino Linotype</option><option>Times New Roman</option><option>Trebuchet MS</option><option>Courier New</option></select>
+<label>Text size <input type="range" id="qz" min="30" max="90" value="56"></label><select id="qal"><option>center</option><option>left</option></select>
+<button class="btn" id="qd">Download PNG</button><button class="btn" id="qsh" hidden>Share</button></div><canvas id="cv" width="1080" height="1080"></canvas></div></section>
+<section id="stats" hidden><h2>Reading Stats</h2><div id="st"></div></section>
+</main><footer>Book data from Open Library. Your data is saved in this browser.</footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+<script src="auth.js"></script>
+<script src="app.js"></script></body></html>
